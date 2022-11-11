@@ -5,13 +5,12 @@ import '../widgets/data_output.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
-
+  static ValueNotifier<double> minHeight = ValueNotifier(800.0);
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  final minHeight = 800.0;
   bool reset = false;
   var carWeight = '',
       tireDia = '',
@@ -79,20 +78,29 @@ class _HomeState extends State<Home> {
       body: SafeArea(
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: max(minHeight, screenHeigth),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                inputFrame(0, reset),
-                controlBtn(),
-                outputFrame(0),
-              ],
-            ),
+          child: ValueListenableBuilder(
+            builder: (BuildContext context, value, Widget? child) {
+              return appContainer(screenHeigth);
+            },
+            valueListenable: Home.minHeight,
           ),
         ),
+      ),
+    );
+  }
+
+  ConstrainedBox appContainer(double screenHeigth) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: max(Home.minHeight.value, screenHeigth),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          inputFrame(0, reset),
+          controlBtn(),
+          outputFrame(0),
+        ],
       ),
     );
   }
@@ -134,6 +142,7 @@ class _HomeState extends State<Home> {
               },
               reset: reset,
               prevVal: carWeight,
+              imageName: 'car_weight',
             ),
             Data_input(
               question: 'Tire diameter',
@@ -143,6 +152,7 @@ class _HomeState extends State<Home> {
               },
               reset: reset,
               prevVal: tireDia,
+              imageName: 'tire_dia',
             ),
             Data_input(
               question: 'Frontal area of car',
@@ -152,6 +162,7 @@ class _HomeState extends State<Home> {
               },
               reset: reset,
               prevVal: frontalArea,
+              imageName: 'frontal_area',
             ),
             Data_input(
               question: 'Maximum speed of car',
@@ -161,15 +172,18 @@ class _HomeState extends State<Home> {
               },
               reset: reset,
               prevVal: dragSpeed,
+              imageName: 'max_speed',
             ),
             Data_input(
-                question: 'Top speed achieving time',
-                unit: 'sec',
-                onChange: (String value) {
-                  timeTaken = value;
-                },
-                reset: reset,
-                prevVal: timeTaken),
+              question: 'Top speed achieving time',
+              unit: 'sec',
+              onChange: (String value) {
+                timeTaken = value;
+              },
+              reset: reset,
+              prevVal: timeTaken,
+              imageName: 'top_time',
+            ),
             Data_input(
               question: 'Coefficint of rolling resistance',
               unit: '',
@@ -178,6 +192,7 @@ class _HomeState extends State<Home> {
               },
               reset: reset,
               prevVal: crr,
+              imageName: 'crr',
             ),
             Data_input(
               question: 'Coefficient of air drag',
@@ -187,6 +202,7 @@ class _HomeState extends State<Home> {
               },
               reset: reset,
               prevVal: cd,
+              imageName: 'cd',
             ),
             // SizedBox(height: 20),
           ],
