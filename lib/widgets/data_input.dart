@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:tractive_power_calc_ev/Pages/home.dart';
 
 class Data_input extends StatefulWidget {
-  const Data_input({
+  Data_input({
     super.key,
     required this.onChange,
     required this.question,
@@ -18,7 +18,7 @@ class Data_input extends StatefulWidget {
   final String question;
   final String unit;
   final String imageName;
-  final bool reset;
+  bool reset;
   final String prevVal;
 
   @override
@@ -32,9 +32,7 @@ class _Data_inputState extends State<Data_input> {
     final contentWidth = MediaQuery.of(context).size.width;
     final imageHeight = min(contentWidth, 200.0);
     var inputController = TextEditingController();
-    if (widget.reset) {
-      inputController.clear();
-    } else {
+    if (!widget.reset) {
       inputController.text = widget.prevVal;
     }
     return Padding(

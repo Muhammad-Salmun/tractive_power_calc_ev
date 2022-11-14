@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import '../widgets/data_input.dart';
 import '../widgets/data_output.dart';
+import '../data/data_def.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -12,37 +13,55 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   bool reset = false;
-  var carWeight = '',
-      tireDia = '',
-      frontalArea = '',
-      dragSpeed = '',
-      timeTaken = '',
-      crr = '',
-      cd = '',
-      maxAcceleration = 0.0,
-      startingTorque = 0.0,
-      totalTractivePower = 0.0,
-      topSpeed = 0.0,
-      topSpeedTorque = 0.0,
-      maxRPMatWheel = 0.0;
+
+  bool isEmpty(param) {
+    if (param.value == '') {
+      _showMyDialog(context, message: '${param.question} cannot be empty');
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  bool isZero(param) {
+    if (double.parse(param.value) == 0) {
+      _showMyDialog(context, message: '${param.question} cannot be zero');
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   //calculating values
   void calculate() {
+    // make sure no values are empty
+    if (isEmpty(carWeight) |
+        isEmpty(tireDia) |
+        isEmpty(frontalArea) |
+        isEmpty(dragSpeed) |
+        isEmpty(timeTaken) |
+        isEmpty(crr) |
+        isEmpty(cd)) return;
+    var velocity = double.parse(dragSpeed.value);
     //velocity is dragSpeed in m.s
-    var velocity = double.parse(dragSpeed);
     velocity = velocity * 0.277777778;
-    maxAcceleration = (velocity / double.parse(timeTaken));
+    // makes sure time taken is not zero
+    if (isEmpty(timeTaken) | isZero(timeTaken)) return;
+    maxAcceleration.value = (velocity / double.parse(timeTaken.value));
     //refer equation of total tractive power(p4 is total force)
-    var p1 = double.parse(crr) * double.parse(carWeight) * 9.81;
-    var p2 = 0.6125 * double.parse(cd) * double.parse(frontalArea);
-    var totalForceForAcceleration = maxAcceleration * double.parse(carWeight);
+    var p1 = double.parse(crr.value) * double.parse(carWeight.value) * 9.81;
+    // p2 cannot be zero
+    if (isZero(cd) | isZero(frontalArea)) return;
+    var p2 = 0.6125 * double.parse(cd.value) * double.parse(frontalArea.value);
+    var totalForceForAcceleration =
+        maxAcceleration.value * double.parse(carWeight.value);
     var p4 = p1 + (p2 * velocity * velocity) + totalForceForAcceleration;
     //starting torque is force times tire dia
-    startingTorque = p4 * double.parse(tireDia) * 0.0127;
-    totalTractivePower = p4 * velocity;
+    startingTorque.value = p4 * double.parse(tireDia.value) * 0.0127;
+    totalTractivePower.value = p4 * velocity;
     //solving cubic equation to obtain top speed
     var p = p1 / p2;
-    var q = totalTractivePower / p2; //minus sign cancels out later
+    var q = totalTractivePower.value / p2; //minus sign cancels out later
     var P = p / 3;
     var Q = q / 2;
     var discriminant = pow(Q, 2) + pow(P, 3);
@@ -55,18 +74,36 @@ class _HomeState extends State<Home> {
     var topVelocity = (t1 + t2).toDouble();
     var p5 = p1 + (p2 * pow(topVelocity, 2));
 
-    topSpeed = topVelocity * 3.6;
-    topSpeedTorque = p5 * double.parse(tireDia) * 0.0127;
-    maxRPMatWheel =
-        (topVelocity * 60) / (double.parse(tireDia) * 0.0254 * 3.14);
-
+    topSpeed.value = topVelocity * 3.6;
+    topSpeedTorque.value = p5 * double.parse(tireDia.value) * 0.0127;
+    // tire dia cannot be zero
+    if (isZero(tireDia)) return;
+    maxRPMatWheel.value =
+        (topVelocity * 60) / (double.parse(tireDia.value) * 0.0254 * 3.14);
     setState(() {});
   }
 
   // reset button action
-  void resetValues() {
+  resetValues() {
     reset = true;
+    carWeight.value = '';
+    tireDia.value = '';
+    frontalArea.value = '';
+    dragSpeed.value = '';
+    timeTaken.value = '';
+    crr.value = '';
+    cd.value = '';
+    maxAcceleration.value = 0.0;
+    startingTorque.value = 0.0;
+    totalTractivePower.value = 0.0;
+    topSpeed.value = 0.0;
+    topSpeedTorque.value = 0.0;
+    maxRPMatWheel.value = 0.0;
     setState(() {});
+    //  runs only after set state is completed
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      reset = false;
+    });
   }
 
   @override
@@ -135,74 +172,74 @@ class _HomeState extends State<Home> {
             ),
             const SizedBox(height: 20),
             Data_input(
-              question: 'Weight of the car',
-              unit: 'Kg',
+              question: carWeight.question,
+              unit: carWeight.unit,
               onChange: (value) {
-                carWeight = value;
+                carWeight.value = value;
               },
               reset: reset,
-              prevVal: carWeight,
-              imageName: 'car_weight',
+              prevVal: carWeight.value,
+              imageName: carWeight.img,
             ),
             Data_input(
-              question: 'Tire diameter',
-              unit: 'in',
+              question: tireDia.question,
+              unit: tireDia.unit,
               onChange: (value) {
-                tireDia = value;
+                tireDia.value = value;
               },
               reset: reset,
-              prevVal: tireDia,
-              imageName: 'tire_dia',
+              prevVal: tireDia.value,
+              imageName: tireDia.img,
             ),
             Data_input(
-              question: 'Frontal area of car',
-              unit: 'm',
+              question: frontalArea.question,
+              unit: frontalArea.unit,
               onChange: (String value) {
-                frontalArea = value;
+                frontalArea.value = value;
               },
               reset: reset,
-              prevVal: frontalArea,
-              imageName: 'frontal_area',
+              prevVal: frontalArea.value,
+              imageName: frontalArea.img,
             ),
             Data_input(
-              question: 'Maximum speed of car',
-              unit: 'kmph',
+              question: dragSpeed.question,
+              unit: dragSpeed.unit,
               onChange: (String value) {
-                dragSpeed = value;
+                dragSpeed.value = value;
               },
               reset: reset,
-              prevVal: dragSpeed,
-              imageName: 'max_speed',
+              prevVal: dragSpeed.value,
+              imageName: dragSpeed.img,
             ),
             Data_input(
-              question: 'Top speed achieving time',
-              unit: 'sec',
+              question: timeTaken.question,
+              unit: timeTaken.unit,
               onChange: (String value) {
-                timeTaken = value;
+                timeTaken.value = value;
               },
               reset: reset,
-              prevVal: timeTaken,
-              imageName: 'top_time',
+              prevVal: timeTaken.value,
+              imageName: timeTaken.img,
             ),
             Data_input(
-              question: 'Coefficint of rolling resistance',
-              unit: '',
+              question: crr.question,
+              unit: crr.unit,
               onChange: (String value) {
-                crr = value;
+                crr.value = value;
               },
               reset: reset,
-              prevVal: crr,
-              imageName: 'crr',
+              prevVal: crr.value,
+              imageName: crr.img,
             ),
             Data_input(
-              question: 'Coefficient of air drag',
-              unit: '',
+              question: cd.question,
+              unit: cd.unit,
               onChange: (String value) {
-                cd = value;
+                cd.value = value;
               },
               reset: reset,
-              prevVal: cd,
-              imageName: 'cd',
+              prevVal: cd.value,
+              imageName: cd.img,
             ),
             // SizedBox(height: 20),
           ],
@@ -287,29 +324,29 @@ class _HomeState extends State<Home> {
               ),
               const SizedBox(height: 10),
               Data_output(
-                outputParam: 'Maximum accelration',
-                outputVal: maxAcceleration.toStringAsFixed(2),
-                outputValUnit: 'm/s',
+                outputParam: maxAcceleration.outputParam,
+                outputVal: maxAcceleration.value.toStringAsFixed(2),
+                outputValUnit: maxAcceleration.unit,
               ),
               Data_output(
-                  outputParam: 'Total tractive power',
-                  outputVal: totalTractivePower.toStringAsFixed(2),
+                  outputParam: totalTractivePower.outputParam,
+                  outputVal: totalTractivePower.value.toStringAsFixed(2),
                   outputValUnit: 'W'),
               Data_output(
                   outputParam: 'Starting torque',
-                  outputVal: startingTorque.toStringAsFixed(2),
+                  outputVal: startingTorque.value.toStringAsFixed(2),
                   outputValUnit: 'Nm'),
               Data_output(
                   outputParam: 'Top speed of the car',
-                  outputVal: topSpeed.toStringAsFixed(2),
+                  outputVal: topSpeed.value.toStringAsFixed(2),
                   outputValUnit: 'kmph'),
               Data_output(
                   outputParam: 'Torque to maintain top speed',
-                  outputVal: topSpeedTorque.toStringAsFixed(2),
+                  outputVal: topSpeedTorque.value.toStringAsFixed(2),
                   outputValUnit: 'Nm'),
               Data_output(
                   outputParam: 'Max RPM at wheel',
-                  outputVal: maxRPMatWheel.toStringAsFixed(2),
+                  outputVal: maxRPMatWheel.value.toStringAsFixed(2),
                   outputValUnit: 'rpm'),
               const SizedBox(height: 15.0),
               ElevatedButton(
@@ -337,6 +374,31 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+}
+
+Future<void> _showMyDialog(context, {required String message}) async {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text(
+          'ERROR!!',
+          style: TextStyle(
+            color: Colors.red,
+          ),
+        ),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
 }
 
 double cbrt(double value) {
