@@ -126,8 +126,10 @@ class _HomeState extends State<Home> {
     );
   }
 
-  ConstrainedBox appContainer(double screenHeigth) {
-    return ConstrainedBox(
+  AnimatedContainer appContainer(double screenHeigth) {
+    return AnimatedContainer(
+      duration: const Duration(seconds: 1),
+      curve: Curves.fastLinearToSlowEaseIn,
       constraints: BoxConstraints(
         maxHeight: max(Home.minHeight.value, screenHeigth),
       ),
@@ -171,7 +173,7 @@ class _HomeState extends State<Home> {
               ),
             ),
             const SizedBox(height: 20),
-            Data_input(
+            DataInput(
               question: carWeight.question,
               unit: carWeight.unit,
               onChange: (value) {
@@ -181,7 +183,7 @@ class _HomeState extends State<Home> {
               prevVal: carWeight.value,
               imageName: carWeight.img,
             ),
-            Data_input(
+            DataInput(
               question: tireDia.question,
               unit: tireDia.unit,
               onChange: (value) {
@@ -191,7 +193,7 @@ class _HomeState extends State<Home> {
               prevVal: tireDia.value,
               imageName: tireDia.img,
             ),
-            Data_input(
+            DataInput(
               question: frontalArea.question,
               unit: frontalArea.unit,
               onChange: (String value) {
@@ -201,7 +203,7 @@ class _HomeState extends State<Home> {
               prevVal: frontalArea.value,
               imageName: frontalArea.img,
             ),
-            Data_input(
+            DataInput(
               question: dragSpeed.question,
               unit: dragSpeed.unit,
               onChange: (String value) {
@@ -211,7 +213,7 @@ class _HomeState extends State<Home> {
               prevVal: dragSpeed.value,
               imageName: dragSpeed.img,
             ),
-            Data_input(
+            DataInput(
               question: timeTaken.question,
               unit: timeTaken.unit,
               onChange: (String value) {
@@ -221,7 +223,7 @@ class _HomeState extends State<Home> {
               prevVal: timeTaken.value,
               imageName: timeTaken.img,
             ),
-            Data_input(
+            DataInput(
               question: crr.question,
               unit: crr.unit,
               onChange: (String value) {
@@ -231,7 +233,7 @@ class _HomeState extends State<Home> {
               prevVal: crr.value,
               imageName: crr.img,
             ),
-            Data_input(
+            DataInput(
               question: cd.question,
               unit: cd.unit,
               onChange: (String value) {

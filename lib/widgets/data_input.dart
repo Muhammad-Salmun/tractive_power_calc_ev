@@ -1,10 +1,9 @@
-// ignore_for_file: prefer_const_constructors, camel_case_types, non_constant_identifier_names, must_be_immutable
-import 'dart:math';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:tractive_power_calc_ev/Pages/home.dart';
 
-class Data_input extends StatefulWidget {
-  Data_input({
+class DataInput extends StatefulWidget {
+  const DataInput({
     super.key,
     required this.onChange,
     required this.question,
@@ -18,19 +17,48 @@ class Data_input extends StatefulWidget {
   final String question;
   final String unit;
   final String imageName;
-  bool reset;
+  final bool reset;
   final String prevVal;
 
   @override
-  State<Data_input> createState() => _Data_inputState();
+  State<DataInput> createState() => _DataInputState();
 }
 
-class _Data_inputState extends State<Data_input> {
-  var turn = 0, height = 0.0;
+class _DataInputState extends State<DataInput> with TickerProviderStateMixin {
+  var _rotate = 0.0;
+  var imageHeight = 200.0;
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.fastLinearToSlowEaseIn,
+    );
+  }
+
+  Future _toggleContainer() async {
+    if (_animation.status != AnimationStatus.completed) {
+      _controller.forward();
+      _rotate -= 1.0 / 2.0;
+      Home.minHeight.value += imageHeight;
+    } else {
+      _rotate += 1.0 / 2.0;
+      _controller.animateBack(0,
+          curve: Curves.fastLinearToSlowEaseIn,
+          duration: const Duration(milliseconds: 400));
+      Home.minHeight.value -= imageHeight;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final contentWidth = MediaQuery.of(context).size.width;
-    final imageHeight = min(contentWidth, 200.0);
     var inputController = TextEditingController();
     if (!widget.reset) {
       inputController.text = widget.prevVal;
@@ -45,14 +73,14 @@ class _Data_inputState extends State<Data_input> {
               Text(
                 // weight of the car
                 widget.question,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 13.0,
                   fontWeight: FontWeight.w300,
                   color: Colors.black54,
                   height: 1.2,
                 ),
               ),
-              Expanded(child: SizedBox()),
+              const Expanded(child: SizedBox()),
               SizedBox(
                 // Unit kg, in, m ....
                 width: 69.0,
@@ -64,17 +92,17 @@ class _Data_inputState extends State<Data_input> {
                     textAlign: TextAlign.center,
                     textAlignVertical: TextAlignVertical.bottom,
                     keyboardType: TextInputType.number,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.black87,
                       fontSize: 14,
                       fontWeight: FontWeight.w300,
                     ),
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black26),
+                          borderSide: const BorderSide(color: Colors.black26),
                           borderRadius: BorderRadius.circular(15.0)),
                       hintText: widget.unit,
-                      hintStyle: TextStyle(
+                      hintStyle: const TextStyle(
                         color: Colors.black26,
                         fontSize: 14,
                         fontWeight: FontWeight.w300,
@@ -83,22 +111,31 @@ class _Data_inputState extends State<Data_input> {
                   ),
                 ),
               ),
-              SizedBox(width: 8.0),
-              Transform.rotate(
-                angle: pi * turn,
+              // drop down arrow
+              const SizedBox(width: 8.0),
+              AnimatedRotation(
+                turns: _rotate,
+                duration: const Duration(milliseconds: 300),
                 child: GestureDetector(
                   onTap: () {
-                    if (turn == 0) {
-                      turn = 1;
-                      height = imageHeight;
-                      Home.minHeight.value += imageHeight;
-                    } else {
-                      turn = 0;
-                      height = 0;
-                      Home.minHeight.value -= imageHeight;
-                    }
+                    _toggleContainer();
+                    // if (_turn == 0) {
+                    //   _turn = 1;
+                    // _rotate -= 1.0 / 2.0;
+                    // _height = imageHeight;
+                    // Home.minHeight.value += imageHeight;
+                    // } else {
+                    //   _turn = 0;
+                    //   _rotate += 1.0 / 2.0;
+                    //   _height = 0;
+                    //   // to avoid the overflow error while animation runs to retract the image
+                    //   setState(() {});
+                    //   Timer(const Duration(milliseconds: 301), () {
+                    //     Home.minHeight.value -= imageHeight;
+                    //   });
+                    // }
                   },
-                  child: Icon(
+                  child: const Icon(
                     Icons.arrow_drop_down,
                     size: 40,
                     color: Colors.black26,
@@ -107,10 +144,14 @@ class _Data_inputState extends State<Data_input> {
               )
             ],
           ),
-          SizedBox(
-            height: height,
-            child: Image.asset(
-              'assets/images/${widget.imageName}.png',
+          SizeTransition(
+            sizeFactor: _animation,
+            axis: Axis.vertical,
+            child: SizedBox(
+              height: 200,
+              child: Image.asset(
+                'assets/images/${widget.imageName}.png',
+              ),
             ),
           )
         ],
