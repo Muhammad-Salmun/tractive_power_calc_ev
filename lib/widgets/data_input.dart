@@ -25,7 +25,7 @@ class DataInput extends StatefulWidget {
 }
 
 class _DataInputState extends State<DataInput> with TickerProviderStateMixin {
-  var _rotate = 0.0;
+  var _rotate = 0.0, _dropdown = 0;
   var imageHeight = 200.0;
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -44,11 +44,13 @@ class _DataInputState extends State<DataInput> with TickerProviderStateMixin {
   }
 
   Future _toggleContainer() async {
-    if (_animation.status != AnimationStatus.completed) {
+    if (_dropdown == 0) {
+      _dropdown = 1;
       _controller.forward();
       _rotate -= 1.0 / 2.0;
       Home.minHeight.value += imageHeight;
     } else {
+      _dropdown = 0;
       _rotate += 1.0 / 2.0;
       _controller.animateBack(0,
           curve: Curves.fastLinearToSlowEaseIn,
@@ -119,21 +121,6 @@ class _DataInputState extends State<DataInput> with TickerProviderStateMixin {
                 child: GestureDetector(
                   onTap: () {
                     _toggleContainer();
-                    // if (_turn == 0) {
-                    //   _turn = 1;
-                    // _rotate -= 1.0 / 2.0;
-                    // _height = imageHeight;
-                    // Home.minHeight.value += imageHeight;
-                    // } else {
-                    //   _turn = 0;
-                    //   _rotate += 1.0 / 2.0;
-                    //   _height = 0;
-                    //   // to avoid the overflow error while animation runs to retract the image
-                    //   setState(() {});
-                    //   Timer(const Duration(milliseconds: 301), () {
-                    //     Home.minHeight.value -= imageHeight;
-                    //   });
-                    // }
                   },
                   child: const Icon(
                     Icons.arrow_drop_down,

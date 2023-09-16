@@ -352,7 +352,7 @@ class _HomeState extends State<Home> {
                   outputValUnit: 'rpm'),
               const SizedBox(height: 15.0),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: _createPDF,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(17, 11, 85, 1),
                   minimumSize: const Size.fromHeight(45.0),
@@ -376,6 +376,10 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+}
+
+_createPDF() {
+  print('Print report');
 }
 
 Future<void> _showMyDialog(context, {required String message}) async {
